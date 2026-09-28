@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Admin — Task Management</title>
+<style>
+:root{
+  --navy:#172d63; --navy2:#0f2352; --blue:#2463eb; --blue2:#3b82f6;
+  --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#6b7280; --line:#e6eaf1;
+  --green:#18a66a; --orange:#e99a18; --red:#e34b59; --purple:#8056d9;
+  --shadow:0 8px 28px rgba(24,42,79,.07); --radius:14px;
+}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+.app{display:flex;min-height:100vh}.sidebar{width:244px;background:linear-gradient(180deg,var(--navy),#132a5c);color:#fff;padding:22px 12px;position:fixed;inset:0 auto 0 0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 12px 28px}.brand-icon{width:42px;height:42px;border-radius:11px;background:#fff;color:var(--blue);display:grid;place-items:center;font-size:23px;font-weight:800}.brand b{display:block;font-size:16px}.brand span{font-size:12px;color:#c9d4ee}
+.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#d9e1f2;text-align:left;padding:12px 14px;border-radius:10px;display:flex;gap:13px;align-items:center;font-weight:600}.nav button:hover,.nav button.active{background:linear-gradient(90deg,#1557d6,#255edc);color:#fff}.nav i{font-style:normal;width:22px;text-align:center;font-size:17px}.sidebar-bottom{position:absolute;left:12px;right:12px;bottom:18px}.profile{border-top:1px solid rgba(255,255,255,.13);padding:17px 9px 10px;display:flex;gap:10px;align-items:center}.avatar{width:38px;height:38px;border-radius:50%;background:#dfe7f7;color:var(--navy);display:grid;place-items:center;font-weight:800}.profile small{color:#c8d3eb}.logout{width:100%;border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:10px}
+.main{margin-left:244px;width:calc(100% - 244px);padding:25px 31px 40px}
+@media(min-width:1200px){.view{min-height:calc((100vw - 244px) * .5625);height:auto;overflow:visible}}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.hello h1{margin:0;font-size:23px}.hello p{margin:6px 0 0;color:var(--muted);font-size:13px}.top-actions{display:flex;align-items:center;gap:12px}.date-box{background:#fff;border:1px solid var(--line);padding:10px 16px;border-radius:12px;min-width:190px}.date-box b{font-size:13px}.date-box span{display:block;color:var(--muted);font-size:12px;margin-top:3px}.primary{background:var(--blue);border:0;color:#fff;border-radius:9px;padding:12px 17px;font-weight:700;box-shadow:0 5px 14px rgba(36,99,235,.22)}.primary:hover{background:#1854d1}
+.view{display:none}.view.active{display:block}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:17px;margin-bottom:20px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;display:flex;gap:13px;min-height:105px;box-shadow:var(--shadow)}.kpi-icon{width:45px;height:45px;border-radius:12px;display:grid;place-items:center;font-size:21px;background:#edf3ff;color:var(--blue)}.kpi:nth-child(2) .kpi-icon{background:#eaf9f1;color:var(--green)}.kpi:nth-child(3) .kpi-icon{background:#fff5df;color:var(--orange)}.kpi:nth-child(4) .kpi-icon{background:#f2edff;color:var(--purple)}.kpi:nth-child(5) .kpi-icon{background:#ffedef;color:var(--red)}.kpi .num{font-size:25px;font-weight:800}.kpi .label{font-weight:700;font-size:13px}.kpi small{display:block;color:var(--muted);margin-top:5px;font-size:11px}
+.grid3{display:grid;grid-template-columns:1.35fr 1fr 1.1fr;gap:18px}.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:18px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px}.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.card-head h3{margin:0;font-size:15px}.link{border:0;background:none;color:var(--blue);font-size:12px;font-weight:700}
+.list{display:grid}.row{padding:12px 2px;border-bottom:1px solid #edf0f5;display:flex;justify-content:space-between;gap:10px;align-items:center}.row:last-child{border-bottom:0}.row-main{min-width:0}.row-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row-sub{font-size:11px;color:var(--muted);margin-top:4px}.tag{display:inline-flex;align-items:center;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:800;white-space:nowrap}.urgent{color:#c82c3b;background:#ffe8eb}.medium{color:#ad6a00;background:#fff1d8}.low{color:#1457b9;background:#eaf2ff}.done{color:#148556;background:#e6f8ef}.draft{color:#2659bd;background:#eaf1ff}.review{color:#ad6a00;background:#fff2d7}.sent{color:#148556;background:#e6f8ef}
+.task-line{display:flex;align-items:flex-start;gap:10px}.check{width:19px;height:19px;border:1px solid #cbd3e0;border-radius:5px;display:grid;place-items:center;flex:0 0 auto;margin-top:1px;background:#fff}.check.on{background:var(--blue);border-color:var(--blue);color:#fff}.time{font-size:11px;font-weight:800;margin-left:auto;white-space:nowrap;padding:4px 7px;border-radius:6px}.time.urgent{color:#d93445;background:#ffe8eb}.time.medium{color:#c47a00;background:#fff1d8}.time.low{color:#1d5fc4;background:#eaf2ff}.progress-box{display:flex;gap:9px;align-items:center}.bar{height:6px;background:#edf0f5;border-radius:8px;width:90px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue);border-radius:8px}
+.activity-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.mini{border:1px solid var(--line);border-radius:10px;padding:11px}.mini b{font-size:18px}.mini span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}.delta{font-size:10px;color:var(--green);font-weight:800}.chart-wrap{height:240px;min-height:240px;margin-top:12px;display:block;position:relative}.chart-wrap canvas{width:100%;height:220px;min-height:220px;display:block;visibility:visible;opacity:1}
+.agenda{display:grid;grid-template-columns:1fr 210px;gap:12px}.agenda-list .agenda-item{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px}.agenda-time{width:43px;font-size:11px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:5px}.agenda-item b{font-size:11px}.agenda-item small{display:block;color:var(--muted);margin-top:4px}.calendar{border-left:1px solid var(--line);padding-left:13px}.cal-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;margin-bottom:9px}.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}.cal-grid span{font-size:9px;color:var(--muted);padding:4px 0}.day{font-size:10px;padding:6px 0;border-radius:50%}.day.today{background:var(--blue);color:#fff;font-weight:800}.day.has{position:relative}.day.has:after{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:var(--orange);bottom:1px;left:calc(50% - 2px)}
+.page-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.page-title h2{margin:0;font-size:22px}.page-title p{margin:5px 0 0;color:var(--muted);font-size:12px}.toolbar{display:flex;gap:9px;flex-wrap:wrap}.input,.select,.textarea{border:1px solid #dce2eb;background:#fff;border-radius:9px;padding:10px 11px;outline:none}.input:focus,.select:focus,.textarea:focus{border-color:var(--blue)}.table-card{overflow:auto}.data-table{width:100%;border-collapse:collapse;font-size:12px;min-width:850px}.data-table th{background:#f7f9fc;color:#667085;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.03em}.data-table th,.data-table td{padding:12px 11px;border-bottom:1px solid var(--line)}.actions{display:flex;gap:5px}.icon-btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 8px}.icon-btn:hover{background:#f3f6fb}.empty{text-align:center;color:var(--muted);padding:25px}
+.pagination{display:flex;justify-content:flex-end;align-items:center;gap:6px;padding-top:12px;flex-wrap:wrap}
+.pagination button{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:7px;padding:6px 10px;font-size:11px;font-weight:700}
+.pagination button:hover:not(:disabled){background:#f3f6fb}.pagination button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.pagination button:disabled{opacity:.45;cursor:not-allowed}.pagination .page-info{font-size:11px;color:var(--muted);margin-right:auto}
+.clickable-day{cursor:pointer}.clickable-day:hover{background:#eef4ff}.day.selected{outline:2px solid var(--blue);outline-offset:1px;background:#eaf2ff;font-weight:800}.day.today.selected{background:var(--blue);color:#fff}
+.agenda-filter{font-size:11px;color:var(--muted);margin:-5px 0 8px}
+
+.modal-back{position:fixed;inset:0;background:rgba(12,25,55,.46);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}.modal-back.open{display:flex}.modal{background:#fff;border-radius:16px;width:min(680px,100%);max-height:90vh;overflow:auto;box-shadow:0 25px 80px rgba(0,0,0,.2)}.modal-head{padding:19px 21px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.modal-head h3{margin:0;font-size:17px}.close{border:0;background:#f2f4f8;border-radius:7px;width:30px;height:30px}.form{padding:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:11px;font-weight:800;color:#4b5563}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.secondary{border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 15px;font-weight:700}.hidden{display:none!important}
+.filters{display:flex;gap:8px;margin-bottom:13px;flex-wrap:wrap}.notice{padding:12px 14px;background:#edf4ff;border:1px solid #d7e5ff;color:#2457a9;border-radius:10px;font-size:12px;margin-bottom:14px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.report-card{padding:18px}.report-number{font-size:28px;font-weight:800}.report-label{font-size:12px;color:var(--muted)}.donut{width:130px;height:130px;border-radius:50%;background:conic-gradient(var(--blue) 0 50%,#21b77a 50% 75%,#f0a020 75% 100%);margin:10px auto;position:relative}.donut:after{content:"";position:absolute;inset:28px;background:#fff;border-radius:50%}.legend{font-size:11px;display:grid;gap:5px}.legend span{display:flex;justify-content:space-between}
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.grid3{grid-template-columns:1fr 1fr}.grid3 .card:last-child{grid-column:1/-1}}
+@media(max-width:850px){.sidebar{width:72px;padding:15px 8px}.brand{padding:4px 8px 22px}.brand div:last-child,.nav button span,.profile div:not(.avatar),.logout span{display:none}.brand{justify-content:center}.nav button{justify-content:center;padding:12px}.sidebar-bottom{left:8px;right:8px}.profile{justify-content:center}.main{margin-left:72px;width:calc(100% - 72px);padding:18px}.topbar{align-items:flex-start}.date-box{display:none}.grid3,.grid2{grid-template-columns:1fr}.agenda{grid-template-columns:1fr}.calendar{border-left:0;border-top:1px solid var(--line);padding:13px 0 0}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.stats-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}.topbar .primary{padding:10px}.hello h1{font-size:18px}.activity-stats{grid-template-columns:1fr 1fr}.stats-grid{grid-template-columns:1fr}}
+
+/* Theme selector */
+.theme-panel{position:fixed;right:24px;top:78px;width:310px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 55px rgba(20,35,70,.18);padding:16px;z-index:40;display:none}.theme-panel.open{display:block}.theme-panel h3{margin:0;font-size:14px}.theme-panel p{margin:4px 0 14px;color:var(--muted);font-size:11px}.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.theme-option{border:1px solid var(--line);background:var(--card);border-radius:11px;padding:10px;text-align:left;transition:.18s}.theme-option:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.08)}.theme-option.active{outline:2px solid var(--blue);outline-offset:1px}.theme-preview{height:30px;border-radius:7px;margin-bottom:7px;display:flex;overflow:hidden}.theme-preview i{flex:1}.theme-name{font-size:11px;font-weight:800}.theme-font{font-size:9px;color:var(--muted);margin-top:2px}.theme-close{position:absolute;right:10px;top:10px;border:0;background:transparent;color:var(--muted);font-size:18px}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">✓</div><div><b>Sales Admin</b><span>Task Management</span></div></div>
+  <nav class="nav">
+    <button class="active" data-view="dashboard"><i>▦</i><span>Dashboard</span></button>
+    <button data-view="tasks"><i>☑</i><span>Tasks</span></button>
+    <button data-view="offers"><i>▤</i><span>Surat Penawaran</span></button>
+    <button data-view="reminders"><i>♧</i><span>Reminder Customer</span></button>
+    <button data-view="customers"><i>♙</i><span>Customer</span></button>
+    <button data-view="calendar"><i>▣</i><span>Calendar</span></button>
+    <button data-view="reports"><i>▥</i><span>Reports</span></button>
+    <button data-view="settings"><i>⚙</i><span>Settings</span></button>
+    <button id="themeMenuBtn"><i>◐</i><span>Pilih Tema</span></button>
+  </nav>
+  <div class="sidebar-bottom"><div class="profile"><div class="avatar">AS</div><div><b style="font-size:12px">Admin Sales</b><small>admin@sales.co.id</small></div></div><button class="logout"><span>↪ &nbsp; Logout</span><b>↪</b></button></div>
+</aside>
+
+<div class="theme-panel" id="themePanel"><button class="theme-close" id="themeClose">×</button><h3>Pilih Tema</h3><p>Pilih kombinasi warna dan font yang selaras dengan dashboard.</p><div class="theme-grid">
+<button class="theme-option" data-theme="ocean"><div class="theme-preview"><i style="background:#172d63"></i><i style="background:#2463eb"></i><i style="background:#f5f7fb"></i><i style="background:#18a66a"></i></div><div class="theme-name">Ocean Blue</div><div class="theme-font">Inter · Segoe UI</div></button>
+<button class="theme-option" data-theme="emerald"><div class="theme-preview"><i style="background:#12372d"></i><i style="background:#159570"></i><i style="background:#f4faf7"></i><i style="background:#e3a33b"></i></div><div class="theme-name">Emerald</div><div class="theme-font">Plus Jakarta Sans</div></button>
+<button class="theme-option" data-theme="royal"><div class="theme-preview"><i style="background:#24164f"></i><i style="background:#7654d8"></i><i style="background:#f7f5fc"></i><i style="background:#e8a44a"></i></div><div class="theme-name">Royal Purple</div><div class="theme-font">Poppins</div></button>
+<button class="theme-option" data-theme="graphite"><div class="theme-preview"><i style="background:#20242b"></i><i style="background:#4b5563"></i><i style="background:#f4f5f7"></i><i style="background:#d49a42"></i></div><div class="theme-name">Graphite</div><div class="theme-font">Manrope</div></button>
+<button class="theme-option" data-theme="rose"><div class="theme-preview"><i style="background:#4a2430"></i><i style="background:#c85b78"></i><i style="background:#fff7f9"></i><i style="background:#d89a52"></i></div><div class="theme-name">Rose Premium</div><div class="theme-font">DM Sans</div></button>
+<button class="theme-option" data-theme="midnight"><div class="theme-preview"><i style="background:#111827"></i><i style="background:#38bdf8"></i><i style="background:#eef2f7"></i><i style="background:#34d399"></i></div><div class="theme-name">Midnight</div><div class="theme-font">Inter Tight</div></button>
+</div></div>
+
+<main class="main">
+<header class="topbar">
+  <div class="hello"><h1>Selamat pagi, Admin Sales! 👋</h1><p>Kelola tugas, surat penawaran, dan reminder customer dengan lebih efisien.</p></div>
+  <div class="top-actions"><div class="date-box"><b id="currentDate">-</b><span id="currentTime">-</span></div><button class="primary" id="addTop">＋ &nbsp; Buat Tugas Baru</button></div>
+</header>
+
+<section id="dashboard" class="view active">
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-icon">✓</div><div><div class="num" id="kTotal">0</div><div class="label">Total Tugas</div><small>Semua tugas ›</small></div></div>
+    <div class="kpi"><div class="kpi-icon">●</div><div><div class="num" id="kDone">0</div><div class="label">Tugas Selesai</div><small>Bulan ini ›</small></div></div>
+    <div class="kpi"><div class="kpi-icon">◷</div><div><div class="num" id="kPending">0</div><div class="label">Tugas Pending</div><small>Perlu perhatian ›</small></div></div>
+    <div class="kpi"><div class="kpi-icon">▤</div><div><div class="num" id="kOffer">0</div><div class="label">Surat Penawaran</div><small>Bulan ini ›</small></div></div>
+    <div class="kpi"><div class="kpi-icon">♧</div><div><div class="num" id="kReminder">0</div><div class="label">Reminder Hari Ini</div><small>Jangan terlewat ›</small></div></div>
+  </div>
+  <div class="grid3">
+    <div class="card"><div class="card-head"><h3>Tugas Hari Ini</h3><button class="link" data-go="tasks">Lihat Semua</button></div><div id="todayTasks" class="list"></div><div id="todayTasksPager" class="pagination"></div></div>
+    <div class="card"><div class="card-head"><h3>Reminder Customer Hari Ini</h3><button class="link" data-go="reminders">Lihat Semua</button></div><div id="todayReminders" class="list"></div><div id="todayRemindersPager" class="pagination"></div></div>
+    <div class="card"><div class="card-head"><h3>Draft Surat Penawaran</h3><button class="link" data-go="offers">Lihat Semua</button></div><div id="draftOffers" class="list"></div><div id="draftOffersPager" class="pagination"></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-head"><h3>Ringkasan Aktivitas</h3><select class="select" id="period"><option value="all">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div>
+      <div class="activity-stats">
+        <div class="mini"><span>Surat Penawaran Dibuat</span><b id="aCreated">0</b><div class="delta" id="pCreated">0%</div></div>
+        <div class="mini"><span>Surat Penawaran Terkirim</span><b id="aSent">0</b><div class="delta" id="pSent">0%</div></div>
+        <div class="mini"><span>Tugas Selesai</span><b id="aDone">0</b><div class="delta" id="pDone">0%</div></div>
+        <div class="mini"><span>Reminder Dilakukan</span><b id="aRemDone">0</b><div class="delta" id="pRemDone">0%</div></div>
+      </div><div class="chart-wrap"><canvas id="activityChart"></canvas></div>
+    </div>
+    <div class="card"><div class="card-head"><h3>Kalender & Agenda</h3><button class="link" data-go="calendar">Lihat Kalender</button></div><div class="agenda"><div><div id="agendaFilter" class="agenda-filter"></div><div id="agendaList" class="agenda-list"></div><div id="agendaPager" class="pagination"></div></div><div class="calendar"><div class="cal-head"><button class="icon-btn" id="prevMonth">‹</button><b id="calTitle">-</b><button class="icon-btn" id="nextMonth">›</button></div><div id="miniCalendar" class="cal-grid"></div></div></div></div>
+  </div>
+</section>
+
+<section id="tasks" class="view">
+  <div class="page-title"><div><h2>Keseluruhan Task</h2><p>Kelola seluruh tugas penawaran dan reminder.</p></div><button class="primary" id="addTask2">＋ Buat Task</button></div>
+  <div class="notice">Data Task, Surat Penawaran, dan Reminder Customer kini menampilkan <b>Tanggal, Waktu, Customer, PIC/Kontak, Catatan, dan Prioritas</b>. Semua data tersimpan otomatis di browser.</div><div class="card table-card"><div class="filters"><input id="taskSearch" class="input" placeholder="Cari task / customer..."><select id="taskMonth" class="select"><option value="">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select><select id="taskStatus" class="select"><option value="">Semua Status</option><option value="Pending">Pending</option><option value="Selesai">Selesai</option></select><select id="taskType" class="select"><option value="">Semua Jenis</option><option value="Penawaran">Penawaran</option><option value="Reminder">Reminder</option></select></div>
+  <table class="data-table"><thead><tr><th>Tanggal</th><th>Waktu</th><th>Jenis Task</th><th>Nama Task</th><th>Kategori</th><th>Customer</th><th>Kontak / PIC</th><th>Catatan</th><th>Prioritas</th><th>Status</th><th>Lama Pengerjaan</th><th>Aksi</th></tr></thead><tbody id="taskTable"></tbody></table></div>
+</section>
+
+<section id="offers" class="view">
+  <div class="page-title"><div><h2>Surat Penawaran</h2><p>Seluruh task dengan kategori penawaran.</p></div><button class="primary" id="addOffer">＋ Surat Penawaran</button></div>
+  <div class="filters"><select id="offerMonth" class="select"><option value="">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div><div class="card table-card"><table class="data-table"><thead><tr><th>Tanggal</th><th>Waktu</th><th>Jenis</th><th>Kategori</th><th>Customer</th><th>Kontak / PIC</th><th>Nomor Surat</th><th>Catatan</th><th>Status</th><th>Prioritas</th><th>Aksi</th></tr></thead><tbody id="offerTable"></tbody></table></div>
+</section>
+
+<section id="reminders" class="view">
+  <div class="page-title"><div><h2>Reminder Customer</h2><p>Seluruh data customer yang perlu dan sudah di-reminder.</p></div><button class="primary" id="addReminder">＋ Reminder Customer</button></div>
+  <div class="filters"><select id="reminderMonth" class="select"><option value="">Semua Bulan</option><option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option><option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option></select></div><div class="card table-card"><table class="data-table"><thead><tr><th>Tanggal</th><th>Waktu</th><th>Customer</th><th>Kontak / PIC</th><th>Catatan</th><th>Prioritas</th><th>Status Reminder</th><th>Aksi</th></tr></thead><tbody id="reminderTable"></tbody></table></div>
+</section>
+
+<section id="customers" class="view">
+  <div class="page-title"><div><h2>Customer</h2><p>Ringkasan customer dari seluruh task.</p></div></div>
+  <div class="card table-card"><table class="data-table"><thead><tr><th>Perusahaan</th><th>Total Task</th><th>Penawaran</th><th>Reminder</th><th>Selesai</th><th>Pending</th></tr></thead><tbody id="customerTable"></tbody></table></div>
+</section>
+
+<section id="calendar" class="view">
+  <div class="page-title"><div><h2>Calendar & Agenda</h2><p>Jadwal tugas, penawaran, dan reminder.</p></div><button class="primary" id="addCal">＋ Buat Task</button></div>
+  <div class="grid2"><div class="card"><div class="cal-head"><button class="icon-btn" id="bigPrev">‹</button><b id="bigCalTitle">-</b><button class="icon-btn" id="bigNext">›</button></div><div id="bigCalendar" class="cal-grid"></div></div><div class="card"><div class="card-head"><h3>Agenda</h3></div><div id="fullAgenda" class="agenda-list"></div></div></div>
+</section>
+
+<section id="reports" class="view">
+  <div class="page-title"><div><h2>Reports</h2><p>Analisis KPI dan produktivitas Admin Sales.</p></div></div>
+  <div class="stats-grid">
+    <div class="card report-card"><div class="report-label">Completion Rate</div><div class="report-number" id="completionRate">0%</div><div class="bar" style="width:100%;margin-top:10px"><i id="completionBar" style="width:0%"></i></div></div>
+    <div class="card report-card"><div class="report-label">Reminder Completion</div><div class="report-number" id="remRate">0%</div><div class="bar" style="width:100%;margin-top:10px"><i id="remBar" style="width:0%"></i></div></div>
+    <div class="card report-card"><div class="report-label">Penawaran Terkirim</div><div class="report-number" id="sentRate">0%</div><div class="bar" style="width:100%;margin-top:10px"><i id="sentBar" style="width:0%"></i></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-head"><h3>Komposisi Status Task</h3></div><div class="donut"></div><div class="legend"><span><b>Pending</b><b id="legPending">0</b></span><span><b>Selesai</b><b id="legDone">0</b></span><span><b>Reminder</b><b id="legReminder">0</b></span></div></div>
+</section>
+
+<section id="settings" class="view">
+  <div class="page-title"><div><h2>Settings</h2><p>Pengaturan aplikasi dan data.</p></div></div>
+  <div class="card"><h3>Data Aplikasi</h3><p style="color:var(--muted);font-size:12px">Data disimpan otomatis di browser menggunakan localStorage.</p><button class="secondary" id="exportBtn">Export Data JSON</button> <button class="secondary" id="resetBtn">Reset Demo Data</button></div>
+</section>
+</main>
+</div>
+
+<div id="modalBack" class="modal-back">
+<div class="modal">
+ <div class="modal-head"><h3 id="modalTitle">Buat Tugas Baru</h3><button class="close" id="closeModal">×</button></div>
+ <form id="taskForm" class="form">
+   <input type="hidden" id="editId">
+   <div class="field" style="margin-bottom:13px"><label>KATEGORI TUGAS *</label><select id="taskCategory" class="select"><option value="Penawaran">Penawaran</option><option value="Reminder">Reminder</option><option value="Surat Keterangan">Surat Keterangan</option></select></div>
+   <div id="offerFields">
+     <div class="field" style="margin-bottom:13px"><label>JENIS PENAWARAN *</label><select id="offerCategory" class="select"><option>Kalibrasi</option><option>Pengadaan</option><option>Service</option><option>Pelatihan</option></select></div>
+   </div>
+   <div class="form-grid">
+     <div class="field"><label>NAMA PERUSAHAAN *</label><input id="company" class="input" required placeholder="Contoh: PT Maju Bersama"></div>
+     <div class="field"><label>NAMA TASK *</label><input id="taskName" class="input" required placeholder="Contoh: Follow Up Penawaran"></div>
+     <div class="field" id="letterField"><label>NOMOR SURAT</label><input id="letterNo" class="input" placeholder="Contoh: 026/MIM/VIII/2026"></div>
+     <div class="field"><label>NAMA PIC / KONTAK</label><input id="contact" class="input" placeholder="Contoh: Bapak Andi / 0812xxxx / email"></div>
+     <div class="field"><label>TANGGAL MASUK *</label><input id="startDate" type="date" class="input" required></div><div class="field"><label>WAKTU TASK *</label><input id="taskTime" type="time" class="input" required></div>
+     <div class="field"><label>TARGET / TANGGAL SELESAI</label><input id="dueDate" type="date" class="input"></div>
+     <div class="field full"><label>CATATAN / KETERANGAN</label><textarea id="notes" class="textarea" rows="3" placeholder="Keterangan task..."></textarea></div>
+     <div class="field"><label>PRIORITAS</label><select id="priority" class="select"><option value="Urgent">Urgent</option><option value="Medium" selected>Medium</option><option value="Low">Low</option></select></div>
+     <div class="field" id="normalStatusField"><label>STATUS</label><select id="status" class="select"><option>Pending</option><option>Selesai</option></select></div><div class="field hidden" id="reminderStatusField"><label>STATUS REMINDER</label><select id="reminderStatus" class="select"><option>PO</option><option>Menunggu Konfirmasi</option><option>Permintaan Penawaran</option><option>Tidak Ada Respon</option></select></div>
+     <div class="field hidden" id="offerStatusField"><label>STATUS SURAT PENAWARAN</label><select id="offerStatus" class="select"><option>Draft</option><option>Review</option><option>Sent</option></select></div>
+   </div>
+   <div class="form-actions"><button type="button" class="secondary" id="cancelModal">Batal</button><button class="primary">Simpan Task</button></div>
+ </form>
+</div></div>
+
+<script>
+const KEY='sales_admin_tasks_v1';
+const demo=[
+ {id:1,type:'Penawaran',offerCat:'Kalibrasi',company:'PT Maju Bersama',name:'Buat Surat Penawaran',letter:'026/MIM/VIII/2026',start:'2026-08-30',due:'2026-08-30',notes:'Kirim quotation kalibrasi',priority:'Urgent',status:'Pending',offerStatus:'Draft',contact:'Bapak Andi'},
+ {id:2,type:'Penawaran',offerCat:'Kalibrasi',company:'CV Sukses Jaya',name:'Follow Up Penawaran',letter:'025/MIM/VIII/2026',start:'2026-08-30',due:'2026-08-30',notes:'Follow up quotation',priority:'Medium',status:'Pending',offerStatus:'Review',contact:'Ibu Sari'},
+ {id:3,type:'Penawaran',offerCat:'Service',company:'PT Berkah Abadi',name:'Kirim Reminder Penawaran',letter:'024/MIM/VIII/2026',start:'2026-08-30',due:'2026-08-30',notes:'Konfirmasi penawaran',priority:'Low',status:'Pending',offerStatus:'Draft',contact:'Bapak Rudi'},
+ {id:4,type:'Penawaran',offerCat:'Pengadaan',company:'UD Sejahtera',name:'Buat Surat Penawaran',letter:'023/MIM/VIII/2026',start:'2026-08-30',due:'2026-08-30',notes:'Penawaran pengadaan alat',priority:'Low',status:'Selesai',offerStatus:'Sent',contact:'Ibu Dina'},
+ {id:5,type:'Reminder',offerCat:'',company:'PT Karya Mandiri',name:'Follow Up Reminder',letter:'',start:'2026-08-30',due:'2026-08-30',notes:'Tanyakan kelanjutan penawaran',priority:'Medium',status:'Pending',offerStatus:'',contact:'Ibu Purchasing'}
+];
+let tasks=JSON.parse(localStorage.getItem(KEY)||'null')||demo;tasks=tasks.map(t=>({...t,time:t.time||'09:00',reminderStatus:t.reminderStatus||''}));
+let calDate=new Date(); let bigCalDate=new Date();
+let selectedAgendaDate='';
+const PAGE_SIZE=5;
+const pagerState={todayTasks:1,todayReminders:1,draftOffers:1,agenda:1};
+const todayISO=()=>new Date().toISOString().slice(0,10);
+selectedAgendaDate=todayISO();
+const fmtDate=s=>s?new Date(s+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'-';
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function save(){localStorage.setItem(KEY,JSON.stringify(tasks));pagerState.todayTasks=1;pagerState.todayReminders=1;pagerState.draftOffers=1;pagerState.agenda=1;renderAll()}
+function priorityTag(p){return `<span class="tag ${p.toLowerCase()}">${esc(p)}</span>`}
+function statusTag(s){return `<span class="tag ${s==='Selesai'?'done':'review'}">${esc(s)}</span>`}
+function daysWork(t){let a=new Date(t.start+'T00:00:00'),b=t.status==='Selesai'&&t.due?new Date(t.due+'T00:00:00'):new Date();return Math.max(0,Math.round((b-a)/86400000))+' hari'}
+function openModal(type='Penawaran',id=null){
+ document.getElementById('modalBack').classList.add('open'); document.getElementById('editId').value=id||'';
+ document.getElementById('modalTitle').textContent=id?'Edit Task':'Buat Tugas Baru';
+ const t=id?tasks.find(x=>x.id==id):null; document.getElementById('taskCategory').value=t?.type||type; toggleForm();
+ const vals={company:t?.company||'',taskName:t?.name||'',letterNo:t?.letter||'',contact:t?.contact||'',startDate:t?.start||todayISO(),taskTime:t?.time||new Date().toTimeString().slice(0,5),dueDate:t?.due||todayISO(),notes:t?.notes||'',priority:t?.priority||'Medium',status:t?.status||'Pending',reminderStatus:t?.reminderStatus||'Menunggu Konfirmasi',offerCategory:t?.offerCat||'Kalibrasi',offerStatus:t?.offerStatus||'Draft'};
+ Object.entries(vals).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
+}
+function toggleForm(){
+ const type=document.getElementById('taskCategory').value, offer=type==='Penawaran', reminder=type==='Reminder';
+ document.getElementById('offerFields').classList.toggle('hidden',!offer); document.getElementById('letterField').classList.toggle('hidden',!offer); document.getElementById('offerStatusField').classList.toggle('hidden',!offer);
+ document.getElementById('normalStatusField').classList.toggle('hidden',reminder); document.getElementById('reminderStatusField').classList.toggle('hidden',!reminder);
+}
+function closeModal(){document.getElementById('modalBack').classList.remove('open')}
+document.getElementById('taskCategory').onchange=toggleForm;
+document.getElementById('closeModal').onclick=closeModal; document.getElementById('cancelModal').onclick=closeModal;
+document.getElementById('addTop').onclick=()=>openModal(); document.getElementById('addTask2').onclick=()=>openModal(); document.getElementById('addOffer').onclick=()=>openModal('Penawaran'); document.getElementById('addReminder').onclick=()=>openModal('Reminder'); document.getElementById('addCal').onclick=()=>openModal();
+document.getElementById('taskForm').onsubmit=e=>{e.preventDefault();const id=document.getElementById('editId').value,type=document.getElementById('taskCategory').value,reminder=type==='Reminder';const obj={id:id?Number(id):Date.now(),type,offerCat:type==='Penawaran'?document.getElementById('offerCategory').value:'',company:document.getElementById('company').value,name:document.getElementById('taskName').value,letter:type==='Penawaran'?document.getElementById('letterNo').value:'',contact:reminder?document.getElementById('contact').value:'',start:document.getElementById('startDate').value,time:document.getElementById('taskTime').value,due:document.getElementById('dueDate').value,notes:document.getElementById('notes').value,priority:document.getElementById('priority').value,status:reminder?'Pending':document.getElementById('status').value,reminderStatus:reminder?document.getElementById('reminderStatus').value:'',offerStatus:type==='Penawaran'?document.getElementById('offerStatus').value:''};if(id)tasks=tasks.map(t=>t.id==id?obj:t);else tasks.push(obj);save();closeModal()};
+function editTask(id){openModal('Penawaran',id)} function deleteTask(id){if(confirm('Hapus task ini?')){tasks=tasks.filter(t=>t.id!=id);save()}} function toggleTask(id, keepPage){
+  const t=tasks.find(x=>x.id===Number(id));
+  if(!t)return;
+  const page=Number(keepPage)||pagerState.todayTasks||1;
+  t.status=t.status==='Selesai'?'Belum':'Selesai';
+  localStorage.setItem(KEY,JSON.stringify(tasks));
+  pagerState.todayTasks=page;
+  renderAll();
+  requestAnimationFrame(()=>{
+    pagerState.todayTasks=page;
+    renderToday();
+  });
+}
+window.editTask=editTask;window.deleteTask=deleteTask;window.toggleTask=toggleTask;
+function timeBadge(t){return `<span class="time ${(t.priority||'Medium').toLowerCase()}">${esc(t.time||'--:--')}</span>`}
+function renderKPI(){let total=tasks.length,done=tasks.filter(t=>t.status==='Selesai').length,pending=total-done,offers=tasks.filter(t=>t.type==='Penawaran').length,rem=tasks.filter(t=>t.type==='Reminder'&&t.start===todayISO()).length;['kTotal','kDone','kPending','kOffer','kReminder'].forEach((id,i)=>document.getElementById(id).textContent=[total,done,pending,offers,rem][i])}
+function renderPager(id,current,total,onPage){
+  const el=document.getElementById(id); if(!el)return;
+  const pages=Math.max(1,Math.ceil(total/PAGE_SIZE)); current=Math.min(Math.max(1,current),pages);
+  if(total<=PAGE_SIZE){el.innerHTML='';return;}
+  let h=`<span class="page-info">Halaman ${current} dari ${pages} · ${total} data</span>`;
+  h+=`<button ${current===1?'disabled':''} onclick="${onPage}(1)">«</button>`;
+  h+=`<button ${current===1?'disabled':''} onclick="${onPage}(${current-1})">‹</button>`;
+  for(let i=Math.max(1,current-2);i<=Math.min(pages,current+2);i++)h+=`<button class="${i===current?'active':''}" onclick="${onPage}(${i})">${i}</button>`;
+  h+=`<button ${current===pages?'disabled':''} onclick="${onPage}(${current+1})">›</button>`;
+  h+=`<button ${current===pages?'disabled':''} onclick="${onPage}(${pages})">»</button>`;
+  el.innerHTML=h;
+}
+function setPage(k,p){pagerState[k]=p;renderToday();renderAgenda()}
+function renderToday(){
+  const today=todayISO();
+  const tt=tasks.filter(t=>t.start===today).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const tp=Math.max(1,Math.ceil(tt.length/PAGE_SIZE)); pagerState.todayTasks=Math.min(pagerState.todayTasks,tp);
+  const tpage=tt.slice((pagerState.todayTasks-1)*PAGE_SIZE,pagerState.todayTasks*PAGE_SIZE);
+  document.getElementById('todayTasks').innerHTML=tpage.length?tpage.map(t=>`<div class="row"><div class="task-line"><div class="check ${t.status==='Selesai'?'on':''}" onclick="toggleTask(${t.id}, pagerState.todayTasks)">${t.status==='Selesai'?'✓':''}</div><div class="row-main"><div class="row-title">${esc(t.name)} — ${esc(t.company)}</div><div class="row-sub">${esc(t.notes||t.type)}</div></div></div><div>${timeBadge(t)} ${priorityTag(t.priority)}</div></div>`).join(''):'<div class="empty">Tidak ada tugas hari ini.</div>';
+  renderPager('todayTasksPager',pagerState.todayTasks,tt.length,'pageTodayTasks');
+
+  const rr=tasks.filter(t=>t.type==='Reminder'&&t.start===today).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const rp=Math.max(1,Math.ceil(rr.length/PAGE_SIZE)); pagerState.todayReminders=Math.min(pagerState.todayReminders,rp);
+  const rpage=rr.slice((pagerState.todayReminders-1)*PAGE_SIZE,pagerState.todayReminders*PAGE_SIZE);
+  document.getElementById('todayReminders').innerHTML=rpage.length?rpage.map(t=>`<div class="row"><div class="row-main"><div class="row-title">♧ &nbsp;${esc(t.company)}</div><div class="row-sub">${esc(t.reminderStatus||t.notes||'Reminder customer')}</div></div>${timeBadge(t)}</div>`).join(''):'<div class="empty">Tidak ada reminder hari ini.</div>';
+  renderPager('todayRemindersPager',pagerState.todayReminders,rr.length,'pageTodayReminders');
+
+  const dr=tasks.filter(t=>t.type==='Penawaran'&&t.offerStatus!=='Sent').sort((a,b)=>a.start.localeCompare(b.start)||(a.time||'').localeCompare(b.time||''));
+  const dp=Math.max(1,Math.ceil(dr.length/PAGE_SIZE)); pagerState.draftOffers=Math.min(pagerState.draftOffers,dp);
+  const dpage=dr.slice((pagerState.draftOffers-1)*PAGE_SIZE,pagerState.draftOffers*PAGE_SIZE);
+  document.getElementById('draftOffers').innerHTML=dpage.length?dpage.map(t=>`<div class="row"><div class="row-main"><div class="row-title">▤ &nbsp;${esc(t.company)}</div><div class="row-sub">Dibuat: ${fmtDate(t.start)} · ${esc(t.time||'--:--')}</div></div><span class="tag ${t.offerStatus==='Review'?'review':'draft'}">${esc(t.offerStatus||'Draft')}</span></div>`).join(''):'<div class="empty">Tidak ada draft.</div>';
+  renderPager('draftOffersPager',pagerState.draftOffers,dr.length,'pageDraftOffers');
+}
+function pageTodayTasks(p){setPage('todayTasks',p)} function pageTodayReminders(p){setPage('todayReminders',p)} function pageDraftOffers(p){setPage('draftOffers',p)}
+window.pageTodayTasks=pageTodayTasks;window.pageTodayReminders=pageTodayReminders;window.pageDraftOffers=pageDraftOffers;
+
+function renderTables(){
+  const q=(document.getElementById('taskSearch')?.value||'').toLowerCase(),
+        tm=document.getElementById('taskMonth')?.value||'',
+        st=document.getElementById('taskStatus')?.value||'',
+        ty=document.getElementById('taskType')?.value||'';
+
+  const filtered=tasks.filter(t=>
+    (!q||(t.company+' '+t.name+' '+t.offerCat+' '+t.type+' '+t.contact+' '+t.notes).toLowerCase().includes(q)) &&
+    (!tm||new Date(t.start+'T00:00:00').getMonth()===Number(tm)) &&
+    (!st||t.status===st) &&
+    (!ty||t.type===ty)
+  );
+
+  document.getElementById('taskTable').innerHTML=filtered.length
+    ? filtered.map(t=>`<tr>
+        <td>${fmtDate(t.start)}</td>
+        <td>${timeBadge(t)}</td>
+        <td>${esc(t.type)}</td>
+        <td><b>${esc(t.name)}</b></td>
+        <td>${esc(t.offerCat||'Reminder Customer')}</td>
+        <td><b>${esc(t.company)}</b></td>
+        <td>${esc(t.contact||'-')}</td>
+        <td title="${esc(t.notes||'')}">${esc(t.notes||'-')}</td>
+        <td>${priorityTag(t.priority)}</td>
+        <td>${t.type==='Reminder'
+          ? `<span class="tag review">${esc(t.reminderStatus||'Menunggu Konfirmasi')}</span>`
+          : statusTag(t.status)}</td>
+        <td>${daysWork(t)}</td>
+        <td><div class="actions">
+          <button class="icon-btn" onclick="editTask(${t.id})">✎</button>
+          <button class="icon-btn" onclick="deleteTask(${t.id})">🗑</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="12" class="empty">Belum ada data.</td></tr>';
+
+  const om=document.getElementById('offerMonth')?.value||'';
+  const offers=tasks.filter(t=>t.type==='Penawaran'&&(!om||new Date(t.start+'T00:00:00').getMonth()===Number(om)));
+  document.getElementById('offerTable').innerHTML=offers.length
+    ? offers.map(t=>`<tr>
+        <td>${fmtDate(t.start)}</td>
+        <td>${timeBadge(t)}</td>
+        <td>${esc(t.name)}</td>
+        <td>${esc(t.offerCat)}</td>
+        <td><b>${esc(t.company)}</b></td>
+        <td>${esc(t.contact||'-')}</td>
+        <td>${esc(t.letter||'-')}</td>
+        <td title="${esc(t.notes||'')}">${esc(t.notes||'-')}</td>
+        <td><span class="tag ${t.offerStatus==='Sent'?'sent':t.offerStatus==='Review'?'review':'draft'}">${esc(t.offerStatus||'Draft')}</span></td>
+        <td>${priorityTag(t.priority)}</td>
+        <td><div class="actions">
+          <button class="icon-btn" onclick="editTask(${t.id})">✎</button>
+          <button class="icon-btn" onclick="deleteTask(${t.id})">🗑</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="11" class="empty">Belum ada surat penawaran.</td></tr>';
+
+  const rm=document.getElementById('reminderMonth')?.value||'';
+  const rem=tasks.filter(t=>t.type==='Reminder'&&(!rm||new Date(t.start+'T00:00:00').getMonth()===Number(rm)));
+  document.getElementById('reminderTable').innerHTML=rem.length
+    ? rem.map(t=>`<tr>
+        <td>${fmtDate(t.start)}</td>
+        <td>${timeBadge(t)}</td>
+        <td><b>${esc(t.company)}</b></td>
+        <td>${esc(t.contact||'-')}</td>
+        <td title="${esc(t.notes||'')}">${esc(t.notes||'-')}</td>
+        <td>${priorityTag(t.priority)}</td>
+        <td><span class="tag review">${esc(t.reminderStatus||'Menunggu Konfirmasi')}</span></td>
+        <td><div class="actions">
+          <button class="icon-btn" onclick="editTask(${t.id})">✎</button>
+          <button class="icon-btn" onclick="deleteTask(${t.id})">🗑</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" class="empty">Belum ada reminder.</td></tr>';
+
+  const companies=[...new Set(tasks.map(t=>t.company).filter(Boolean))];
+  document.getElementById('customerTable').innerHTML=companies.length
+    ? companies.map(c=>{
+        const a=tasks.filter(t=>t.company===c);
+        return `<tr><td><b>${esc(c)}</b></td><td>${a.length}</td><td>${a.filter(t=>t.type==='Penawaran').length}</td><td>${a.filter(t=>t.type==='Reminder').length}</td><td>${a.filter(t=>t.status==='Selesai').length}</td><td>${a.filter(t=>t.status!=='Selesai').length}</td></tr>`
+      }).join('')
+    : '<tr><td colspan="6" class="empty">Belum ada customer.</td></tr>';
+}
+function monthTasks(month){if(month==='all')return tasks;const m=Number(month);return tasks.filter(t=>t.start&&new Date(t.start+'T00:00:00').getMonth()===m)}
+function activity(){const data=monthTasks(document.getElementById('period').value),offers=data.filter(t=>t.type==='Penawaran'),sent=offers.filter(t=>t.offerStatus==='Sent'),done=data.filter(t=>t.status==='Selesai'),remDone=data.filter(t=>t.type==='Reminder'&&t.status==='Selesai');document.getElementById('aCreated').textContent=offers.length;document.getElementById('aSent').textContent=sent.length;document.getElementById('aDone').textContent=done.length;document.getElementById('aRemDone').textContent=remDone.length;const vals=[offers.length,sent.length,done.length,remDone.length],max=Math.max(1,...vals);['pCreated','pSent','pDone','pRemDone'].forEach((id,i)=>document.getElementById(id).textContent=Math.round(vals[i]/max*100)+'%');drawChart(data);const cr=data.length?Math.round(done.length/data.length*100):0,rt=data.filter(t=>t.type==='Reminder').length,rr=rt?Math.round(remDone.length/rt*100):0,sr=offers.length?Math.round(sent.length/offers.length*100):0;[['completionRate','completionBar',cr],['remRate','remBar',rr],['sentRate','sentBar',sr]].forEach(x=>{document.getElementById(x[0]).textContent=x[2]+'%';document.getElementById(x[1]).style.width=x[2]+'%'});document.getElementById('legPending').textContent=data.filter(t=>t.status!=='Selesai').length;document.getElementById('legDone').textContent=done.length;document.getElementById('legReminder').textContent=data.filter(t=>t.type==='Reminder').length}
+function drawChart(data=tasks){
+  const canvas=document.getElementById('activityChart');
+  if(!canvas)return;
+  const wrap=canvas.parentElement;
+  const rect=wrap?wrap.getBoundingClientRect():{width:800};
+  const w=Math.max(360,Math.floor(rect.width||800));
+  const h=220;
+  const d=window.devicePixelRatio||1;
+  canvas.style.display='block';
+  canvas.style.visibility='visible';
+  canvas.style.opacity='1';
+  canvas.style.width='100%';
+  canvas.style.height=h+'px';
+  canvas.width=Math.floor(w*d);
+  canvas.height=Math.floor(h*d);
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return;
+  ctx.setTransform(d,0,0,d,0,0);
+  ctx.clearRect(0,0,w,h);
+
+  const rows=data||[];
+  const values=[
+    rows.filter(t=>t.type==='Penawaran').length,
+    rows.filter(t=>t.type==='Penawaran'&&t.offerStatus==='Sent').length,
+    rows.filter(t=>t.status==='Selesai').length,
+    rows.filter(t=>t.type==='Reminder'&&t.status==='Selesai').length
+  ];
+  const labels=['Penawaran Dibuat','Penawaran Terkirim','Tugas Selesai','Reminder Dilakukan'];
+  const max=Math.max(1,...values);
+  const left=150,right=52,top=12,rowGap=51,barH=14;
+  const barW=Math.max(120,w-left-right);
+
+  ctx.font='600 11px Arial';
+  labels.forEach((label,i)=>{
+    const y=top+i*rowGap;
+    const value=values[i];
+    const fillW=(value/max)*barW;
+
+    ctx.fillStyle='#475467';
+    ctx.textAlign='right';
+    ctx.fillText(label,left-12,y+12);
+
+    ctx.fillStyle='#edf1f6';
+    ctx.beginPath();
+    ctx.roundRect(left,y,barW,barH,8);
+    ctx.fill();
+
+    ctx.fillStyle='#2563eb';
+    if(fillW>0){
+      ctx.beginPath();
+      ctx.roundRect(left,y,Math.max(8,fillW),barH,8);
+      ctx.fill();
+    }
+
+    ctx.fillStyle='#111827';
+    ctx.textAlign='left';
+    ctx.font='bold 11px Arial';
+    ctx.fillText(String(value),left+barW+10,y+12);
+  });
+}
+
+function renderAgenda(){
+  const base=selectedAgendaDate||todayISO();
+  const rows=tasks.filter(t=>t.start===base).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const pages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));pagerState.agenda=Math.min(pagerState.agenda,pages);
+  const page=rows.slice((pagerState.agenda-1)*PAGE_SIZE,pagerState.agenda*PAGE_SIZE);
+  document.getElementById('agendaFilter').textContent='Agenda tanggal '+fmtDate(base)+' · '+rows.length+' task';
+  const html=page.length?page.map(t=>`<div class="agenda-item"><div class="agenda-time">${esc(t.time||'--:--')}</div><div class="dot"></div><div><b>${esc(t.name)} — ${esc(t.company)}</b><small>${esc(t.notes||t.type)} · ${esc(t.contact||'')}</small></div></div>`).join(''):'<div class="empty">Tidak ada task pada tanggal ini.</div>';
+  document.getElementById('agendaList').innerHTML=html;
+  const full=document.getElementById('fullAgenda');if(full)full.innerHTML=html;
+  renderPager('agendaPager',pagerState.agenda,rows.length,'pageAgenda');
+}
+function pageAgenda(p){setPage('agenda',p)}window.pageAgenda=pageAgenda;
+function selectAgendaDate(iso){selectedAgendaDate=iso;pagerState.agenda=1;renderCalendars();renderAgenda()}window.selectAgendaDate=selectAgendaDate;
+
+function buildCalendar(el,date,titleId){
+  const y=date.getFullYear(),m=date.getMonth(),first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),start=(first.getDay()+6)%7;
+  document.getElementById(titleId).textContent=date.toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+  let h=['Sen','Sel','Rab','Kam','Jum','Sab','Min'].map(x=>`<span>${x}</span>`).join('');
+  for(let i=0;i<start;i++)h+='<span></span>';
+  for(let d=1;d<=days;d++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,has=tasks.some(t=>t.start===iso),tod=iso===todayISO(),sel=iso===selectedAgendaDate;
+    h+=`<div class="day clickable-day ${tod?'today':''} ${has?'has':''} ${sel?'selected':''}" onclick="selectAgendaDate('${iso}')">${d}</div>`;
+  }
+  el.innerHTML=h;
+}
+
+function renderCalendars(){buildCalendar(document.getElementById('miniCalendar'),calDate,'calTitle');buildCalendar(document.getElementById('bigCalendar'),bigCalDate,'bigCalTitle')}
+function renderChartSafe(){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    try{activity()}catch(e){console.error(e)}
+  }));
+}
+function renderAll(){renderKPI();renderToday();renderTables();activity();renderAgenda();renderCalendars()
+  renderChartSafe();
+}
+function clock(){let d=new Date();document.getElementById('currentDate').textContent=d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('currentTime').textContent=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+' WIB'}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{pagerState.agenda=1;renderAgenda();document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(b.dataset.view).classList.add('active')});
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>document.querySelector(`.nav button[data-view="${b.dataset.go}"]`).click());
+['taskSearch','taskStatus','taskType'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{pagerState.todayTasks=1;pagerState.todayReminders=1;pagerState.draftOffers=1;renderTables();}));
+['taskMonth','offerMonth','reminderMonth'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{pagerState.todayTasks=1;pagerState.todayReminders=1;pagerState.draftOffers=1;renderTables();}));document.getElementById('period').addEventListener('change',activity);
+document.getElementById('prevMonth').onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderCalendars()};document.getElementById('nextMonth').onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderCalendars()};
+document.getElementById('bigPrev').onclick=()=>{bigCalDate.setMonth(bigCalDate.getMonth()-1);renderCalendars()};document.getElementById('bigNext').onclick=()=>{bigCalDate.setMonth(bigCalDate.getMonth()+1);renderCalendars()};
+document.getElementById('exportBtn').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.download='sales-admin-data.json';a.click()};
+document.getElementById('resetBtn').onclick=()=>{if(confirm('Reset ke data demo?')){tasks=demo.map(x=>({...x}));save()}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+clock();setInterval(clock,1000);renderAll();window.addEventListener('resize',()=>{if(document.getElementById('dashboard').classList.contains('active'))drawChart(monthTasks(document.getElementById('period').value))});
+</script>
+</body>
+</html>
+<script>
+window.salesChartAutoRefresh=true;
+window.addEventListener('load',function(){
+  setTimeout(function(){try{drawChart(tasks)}catch(e){}},150);
+  setTimeout(function(){try{drawChart(tasks)}catch(e){}},700);
+});
+window.addEventListener('resize',function(){
+  setTimeout(function(){try{drawChart(tasks)}catch(e){}},100);
+});
+
+const themePresets={
+ ocean:{navy:'#172d63',navy2:'#0f2352',blue:'#2463eb',blue2:'#3b82f6',bg:'#f5f7fb',card:'#fff',text:'#172033',muted:'#6b7280',line:'#e6eaf1',green:'#18a66a',orange:'#e99a18',red:'#e34b59',purple:'#8056d9',font:'Inter,Segoe UI,Arial,sans-serif'},
+ emerald:{navy:'#12372d',navy2:'#0d2a22',blue:'#159570',blue2:'#28b58c',bg:'#f4faf7',card:'#fff',text:'#18332b',muted:'#6b7d76',line:'#dfeae5',green:'#159570',orange:'#e3a33b',red:'#d85b61',purple:'#7861c9',font:'Plus Jakarta Sans,Segoe UI,Arial,sans-serif'},
+ royal:{navy:'#24164f',navy2:'#171033',blue:'#7654d8',blue2:'#9478e5',bg:'#f7f5fc',card:'#fff',text:'#29213e',muted:'#746d82',line:'#e8e2f2',green:'#35a77a',orange:'#e8a44a',red:'#d75b73',purple:'#7654d8',font:'Poppins,Segoe UI,Arial,sans-serif'},
+ graphite:{navy:'#20242b',navy2:'#15181d',blue:'#4b5563',blue2:'#667384',bg:'#f4f5f7',card:'#fff',text:'#252a31',muted:'#707780',line:'#e1e4e8',green:'#3d9b78',orange:'#d49a42',red:'#c85d63',purple:'#7569a8',font:'Manrope,Segoe UI,Arial,sans-serif'},
+ rose:{navy:'#4a2430',navy2:'#341923',blue:'#c85b78',blue2:'#db7892',bg:'#fff7f9',card:'#fff',text:'#3a2730',muted:'#806d74',line:'#f0dfe4',green:'#4e9a7b',orange:'#d89a52',red:'#c85b63',purple:'#8668b4',font:'DM Sans,Segoe UI,Arial,sans-serif'},
+ midnight:{navy:'#111827',navy2:'#0b1220',blue:'#38bdf8',blue2:'#60c8fa',bg:'#eef2f7',card:'#fff',text:'#182233',muted:'#697586',line:'#dce2ea',green:'#34d399',orange:'#f3b34c',red:'#e56b75',purple:'#8b7ae6',font:'Inter Tight,Inter,Segoe UI,Arial,sans-serif'}
+};
+function applyTheme(name){const t=themePresets[name]||themePresets.ocean;const root=document.documentElement;Object.entries(t).forEach(([k,v])=>{if(k!=='font')root.style.setProperty('--'+k,v)});document.body.style.fontFamily=t.font;localStorage.setItem('salesAdminTheme',name);document.querySelectorAll('.theme-option').forEach(b=>b.classList.toggle('active',b.dataset.theme===name));}
+const themePanel=document.getElementById('themePanel'),themeMenuBtn=document.getElementById('themeMenuBtn'),themeClose=document.getElementById('themeClose');
+if(themeMenuBtn)themeMenuBtn.addEventListener('click',()=>themePanel.classList.toggle('open'));
+if(themeClose)themeClose.addEventListener('click',()=>themePanel.classList.remove('open'));
+document.querySelectorAll('.theme-option').forEach(b=>b.addEventListener('click',()=>{applyTheme(b.dataset.theme);themePanel.classList.remove('open')}));
+applyTheme(localStorage.getItem('salesAdminTheme')||'ocean');
+</script>
